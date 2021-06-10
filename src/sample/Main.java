@@ -17,9 +17,9 @@ public class Main extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception{
 		Parent root = FXMLLoader.load(getClass().getResource("main.fxml"));
-		primaryStage.setTitle("Chat Messela - Blockchain Messenger");
-		primaryStage.setScene(new Scene(root, 650, 350));
-		primaryStage.setResizable(false);
+		primaryStage.setTitle("Blockchain Messenger");
+		primaryStage.setScene(new Scene(root, 650, 400));
+		primaryStage.setResizable(true);
 		primaryStage.show();
 	}
 
@@ -29,10 +29,8 @@ public class Main extends Application{
 		Miner pro = new Miner("pro",port);
 		pro.start();
 
-
 		//User Mode
 		//launch(args);
 		//System.exit(0);
-
 	}
 }

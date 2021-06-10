@@ -11,7 +11,12 @@ public class Broadcast {
 		@SuppressWarnings("resource")
 		Scanner sc = new Scanner(System.in);
 
-		InetAddress address = Network.availableInterfaces().get(0);
+		InetAddress address = Network.availableInterfaces().get(1);
+
+		for (int i=0; i < Network.availableInterfaces().size(); i++){
+			System.out.println(Network.availableInterfaces().get(i));
+		}
+
 
 		while(true) {
 			int port = sc.nextInt();
@@ -26,14 +31,6 @@ public class Broadcast {
 
 		byte[] buffer = broadcastMessage.getBytes();
 		DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, port);
-
-		/*
-		* Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-		for (NetworkInterface netint : Collections.list(nets))
-			Network.displayInterfaceInformation(netint);*/
-
-		//Network.cmd();
-
 		socket.send(packet);
 		socket.close();
 	}

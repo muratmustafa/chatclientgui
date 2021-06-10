@@ -1,6 +1,9 @@
 package sample;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 
@@ -17,12 +20,47 @@ public class Miner extends User{
 		broadCastMessage(message);
 	}
 
-	public void broadCastMessage(String m) throws IOException {
-		udpModel.sendDataViaUDP(hostname, m);
+	void broadCastMessage(String m) throws IOException {		
+		Broadcast.broadcast(m, InetAddress.getByName("192.168.1.255"), port);
 	}
 
-	public void recieve(String sentence){
+	@Override
+	public void recieve(int port) {
+		try {
+			@SuppressWarnings("resource")
+			DatagramSocket serverSocket = new DatagramSocket(port);
+			byte[] receiveData = new byte[65507];
 
+			System.out.printf("Listening on udp:%s:%d%n",
+					InetAddress.getLocalHost().getHostAddress(), port);     
+			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+			while(true){
+				serverSocket.receive(receivePacket);
+				String sentence = new String( receivePacket.getData(), 0, receivePacket.getLength() );
+				System.out.println("\nRECEIVED --> " + sentence);
+				if(sentence.startsWith("MESSAGE")) {
+					String[] data = sentence.split(",");
+					Message m = (Message)SerializeObject.deserializeObject(data[1]);
+					blockChain.addMessage(m);
+					broadcastEverything();
+				}else if(sentence.startsWith("NEWUSER")) {
+					String[] data = sentence.split(",");
+					String newUserName = data[1];
+					PublicKey newPublicKey = (PublicKey)SerializeObject.deserializeObject(data[2]);
+					if(publicKeys.containsKey(newUserName)) {
+						broadCastMessage("DENIEDNEWUSER," + newUserName);
+					}
+					else {
+						publicKeys.put(newUserName, newPublicKey);
+						broadcastAllPublicKeys();
+					}
+				}
+			}
+		} catch (IOException e) {
+			System.out.println(e);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}   
 	}
 
 	private void broadcastAllPublicKeys() throws IOException {
@@ -31,4 +69,7 @@ public class Miner extends User{
 		broadCastMessage(message);
 		
 	}
+
+
+
 }
